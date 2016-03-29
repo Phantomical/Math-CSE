@@ -20,6 +20,50 @@ namespace SubexpressionEliminator
 
 	class NodeFactory
 	{
+		/// <summary>
+		/// Creates an expression node tree from a string.
+		/// </summary>
+		/// <param name="text">The string to parse into an AST.</param>
+		/// <returns></returns>
+		public static IExpressionNode ParseExpressionTree(string text)
+		{
+			Parser parser = new Parser(text);
+			return CreateExpressionTree(parser);
+		}
+		/// <summary>
+		/// Flattens all the nodes in a tree into a collection.
+		/// </summary>
+		/// <param name="tree"></param>
+		/// <returns></returns>
+		static public IEnumerable<IExpressionNode> FlattenTree(IExpressionNode tree)
+		{
+			List<IExpressionNode> nodes = new List<IExpressionNode>();
+			nodes.Add(tree);
+
+			foreach (IExpressionNode node in tree.Children)
+			{
+				nodes.AddRange(FlattenTree(node));
+			}
+
+			return nodes;
+		}
+		/// <summary>
+		/// Flattens all the nodes in a list of trees into a collection.
+		/// </summary>
+		/// <param name="nodes"></param>
+		/// <returns></returns>
+		static public List<IExpressionNode> FlattenAll(IEnumerable<IExpressionNode> nodes)
+		{
+			List<IExpressionNode> start = new List<IExpressionNode>(nodes);
+
+			foreach (var node in nodes)
+			{
+				start.AddRange(FlattenTree(node));
+			}
+
+			return start;
+		}
+
 		public static IExpressionNode CreateExpressionTree(Parser parser)
 		{
 			return CreateExpressionTree(parser, true);

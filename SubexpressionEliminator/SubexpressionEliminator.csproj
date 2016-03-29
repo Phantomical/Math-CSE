@@ -52,6 +52,7 @@
     <Compile Include="Nodes\OperatorNode.cs" />
     <Compile Include="Nodes\UnaryOperatorNode.cs" />
     <Compile Include="Nodes\VariableNode.cs" />
+    <Compile Include="Optimizer.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

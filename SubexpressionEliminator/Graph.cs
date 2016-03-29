@@ -17,12 +17,15 @@ namespace SubexpressionEliminator
 
 			public void FindEdges(List<Node> Nodes)
 			{
-				List<IExpressionNode> flat = Program.FlattenTree(ExprNode);
-				List<IExpressionNode> lst = flat.Where(x => (x is Nodes.VariableNode)).ToList();
+				IEnumerable<IExpressionNode> flat = NodeFactory.FlattenTree(ExprNode);
+				IEnumerable<IExpressionNode> lst = flat.Where(x => (x is Nodes.VariableNode));
 				Edges = Nodes.Where(x =>
 				{
 					bool val = false;
-					lst.ForEach(n => val = val || (!Object.ReferenceEquals(x, this) && x.ShouldEdge(n)));
+					foreach(var n in lst)
+					{
+						val = val || (!Object.ReferenceEquals(x, this) && x.ShouldEdge(n));
+					}
 					return val;
 				}).ToList();
 			}
