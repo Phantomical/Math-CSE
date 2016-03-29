@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace SubexpressionEliminator
 {
+	/// <summary>
+	/// This class builds a Directed Acyclic Graph from a list of ExpressionNodes.
+	/// </summary>
 	class Graph
 	{
 		List<Node> Nodes;

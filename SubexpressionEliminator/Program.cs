@@ -22,6 +22,8 @@ namespace SubexpressionEliminator
 
 			string file = File.ReadAllText(args[0]);
 
+			//This makes the debugger break when the exception is thrown
+			//It serves no use in release builds so we enable it.
 #if !DEBUG
 			try
 			{
@@ -49,6 +51,8 @@ namespace SubexpressionEliminator
 			}
 			catch (ExpressionTraversalException e)
 			{
+				//Error reporting needs to be improved
+				//TODO: Make error reporting report the line where it errored
 				Console.WriteLine("Error while parsing input: " + e.Message);
 			}
 #endif
