@@ -8,6 +8,35 @@ namespace SubexpressionEliminator
 {
 	class Optimizer
 	{
+		class Ref
+		{
+			private IExpressionNode Node;
+			private int Index;
+
+			public IExpressionNode Value
+			{
+				get
+				{
+					return Node.Children[Index];
+				}
+				set
+				{
+					Node.Children[Index] = value;
+				}
+			}
+
+			public Ref(IExpressionNode parent, int index)
+			{
+				Node = parent;
+				Index = index;
+			}
+
+			bool Equals(Ref o)
+			{
+				return Index == o.Index && Node.Equals(o.Node);
+			}
+		}
+
 		public static void RemoveUnused(ICollection<IExpressionNode> nodes)
 		{
 			bool cond;
@@ -51,46 +80,56 @@ namespace SubexpressionEliminator
 			List<IExpressionNode> nodes = new List<IExpressionNode>();
 			nodes.Add(tree);
 
-			bool creatednode = false;
 			int tmpcounter = 0;
-			const int max = 300;
 
-			do
+			/*
+				This part could be put in a loop but it doesn't seem to help
+				much. If this is run many times it will only create variable
+				assignments without actually optimizing the algorithm at all.
+				Since all those extra nodes are pruned anyway by the next
+				stages. Also, until the algorithm stops producing extraneous
+				nodes, it won't know when to stop. So one iteration is 
+				usually good.
+			*/
+			List<IExpressionNode> flat = NodeFactory.FlattenAll(nodes);
+
+			foreach (var node in flat)
 			{
-				List<IExpressionNode> flat = NodeFactory.FlattenAll(nodes);
+				if (node is Nodes.AssignmentNode || node is Nodes.LiteralNode || node is Nodes.VariableNode)
+					//There is no point in optimizing these to variables
+					continue;
+				if (node is Nodes.UnaryOperatorNode && node.Children[0] is Nodes.LiteralNode)
+					//There is no point in optimizing -1 or -2 to a separate variable
+					continue;
 
-				foreach (var node in flat)
+				IExpressionNode newnode = new Nodes.VariableNode(Program.tmpvarstart + tmpcounter);
+
+				var results = new List<Ref>();
+
+				foreach (var n in flat)
 				{
-					if (node is Nodes.AssignmentNode || node is Nodes.LiteralNode || node is Nodes.VariableNode)
-						//There is no point in optimizing these to variables
-						continue;
-
-					bool create = false;
-
-					IExpressionNode newnode = new Nodes.VariableNode(Program.tmpvarstart + tmpcounter);
-
-					for (int k = 0; k < flat.Count; k++)
+					for (int i = 0; i < n.Children.Count; ++i)
 					{
-						var lst = flat[k].Children;
-						for (int j = 0; j < lst.Count; ++j)
+						if (n.Children[i].Equals(node))
 						{
-							if (lst[j].Equals(node))
+							var rf = new Ref(n, i);
+							if (!results.Contains(rf))
 							{
-								create = true;
-								lst[j] = newnode;
+								results.Add(rf);
 							}
 						}
 					}
-
-					if (create)
-					{
-
-						creatednode = true;
-						nodes.Add(new Nodes.AssignmentNode(Program.tmpvarstart + tmpcounter, Program.vartype, node));
-						tmpcounter++;
-					}
 				}
-			} while (creatednode && tmpcounter < max);
+
+				if (results.Count < 2)
+					continue;
+
+				foreach (var result in results)
+					result.Value = newnode;
+
+				nodes.Add(new Nodes.AssignmentNode(Program.tmpvarstart + tmpcounter, Program.vartype, node));
+				tmpcounter++;
+			}
 
 			return nodes;
 		}
