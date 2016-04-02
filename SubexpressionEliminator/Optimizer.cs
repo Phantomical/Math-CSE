@@ -93,10 +93,9 @@ namespace SubexpressionEliminator
 			} while (cond);
 		}
 
-		public static List<IExpressionNode> OptimizeTree(IExpressionNode tree)
+		public static List<IExpressionNode> OptimizeTree(List<IExpressionNode> tree)
 		{
-			List<IExpressionNode> nodes = new List<IExpressionNode>();
-			nodes.Add(tree);
+			List<IExpressionNode> nodes = tree.ToList();
 
 			int tmpcounter = 0;
 

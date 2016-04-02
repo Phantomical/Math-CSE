@@ -19,8 +19,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.IO;
 
 namespace SubexpressionEliminator
@@ -29,10 +28,10 @@ namespace SubexpressionEliminator
 	{
 		public static string tmpvarstart = "tmp";
 		public static string vartype = "double";
-		
+
 		static void Main(string[] args)
 		{
-			if(args.Length < 2)
+			if (args.Length < 2)
 			{
 				Console.WriteLine("Usage: " + AppDomain.CurrentDomain.FriendlyName + " <source file> <dest file>");
 				return;
@@ -46,16 +45,22 @@ namespace SubexpressionEliminator
 			try
 			{
 #endif
-				IExpressionNode node = NodeFactory.ParseExpressionTree(file);
+				List<IExpressionNode> node = NodeFactory.ParseExpressionTreeList(file);
 				List<IExpressionNode> nodes = Optimizer.OptimizeTree(node);
-				Optimizer.RemoveUnused(nodes);
-				IExpressionNode start = new Nodes.AssignmentNode("result", vartype, nodes.First());
-				nodes.RemoveAt(0);
+				bool cond = false;
+				if (!(nodes[0] is Nodes.AssignmentNode))
+				{
+					nodes[0] = new Nodes.AssignmentNode("result", vartype, nodes.First());
+					cond = true;
+				}
+				nodes.Reverse();
 
+				if(cond)
+					Optimizer.RemoveUnused(nodes);
+				
 				Graph g = new Graph(nodes);
 				g.Sort();
 				nodes = g.GetList();
-				nodes.Add(start);
 
 				string total = "";
 

@@ -38,6 +38,39 @@ namespace SubexpressionEliminator
 
 	class NodeFactory
 	{
+		public static List<IExpressionNode> ParseExpressionTreeList(string text)
+		{
+			Parser parser = new Parser(text);
+			List<IExpressionNode> nodes = new List<IExpressionNode>();
+
+			if(parser.Current().Value == Parser.Identifier 
+				&& parser.Next(1).Value == Parser.Identifier
+				&& parser.Next(2).Value == Parser.Assigment)
+			{
+				do
+				{
+					string type = parser.Current().Text;
+					string name = parser.Next(1).Text;
+					parser.Consume();
+					parser.Consume();
+					parser.Consume();
+
+					IExpressionNode node = new Nodes.AssignmentNode(name, type, CreateExpressionTree(parser));
+					nodes.Add(node);
+					if (parser.Current().Value == Parser.SemiColon)
+						parser.Consume();
+				} while (parser.Current().Value == Parser.Identifier
+					&& parser.Next(1).Value == Parser.Identifier
+					&& parser.Next(2).Value == Parser.Assigment);
+			}
+			else
+			{
+				nodes.Add(CreateExpressionTree(parser));
+			}
+
+			return nodes;
+		}
+
 		/// <summary>
 		/// Creates an expression node tree from a string.
 		/// </summary>
@@ -48,6 +81,12 @@ namespace SubexpressionEliminator
 			Parser parser = new Parser(text);
 			return CreateExpressionTree(parser);
 		}
+
+		private static void FlattenInternal(List<IExpressionNode> nodes, IExpressionNode tree)
+		{
+
+		}
+
 		/// <summary>
 		/// Flattens all the nodes in a tree into a collection.
 		/// </summary>
@@ -56,11 +95,15 @@ namespace SubexpressionEliminator
 		static public IEnumerable<IExpressionNode> FlattenTree(IExpressionNode tree)
 		{
 			List<IExpressionNode> nodes = new List<IExpressionNode>();
-			nodes.Add(tree);
+			var stack = new Stack<IExpressionNode>();
+			stack.Push(tree);
 
-			foreach (IExpressionNode node in tree.Children)
+			while(stack.Any())
 			{
-				nodes.AddRange(FlattenTree(node));
+				var next = stack.Pop();
+				nodes.Add(next);
+				foreach (var child in next.Children)
+					stack.Push(child);
 			}
 
 			return nodes;

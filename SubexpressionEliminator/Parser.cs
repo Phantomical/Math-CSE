@@ -126,16 +126,24 @@ namespace SubexpressionEliminator
 					continue;
 				}
 
+				if (c == ';')
+				{
+					Tokens.Add(new Token(SemiColon, ";"));
+					tmp = tmp.Substring(1);
+					continue;
+				}
+
 				{
 					string total = "";
 					int ctr = 0;
 
-					while (!Char.IsDigit(tmp[ctr])
+					while (ctr < tmp.Length
 						&& !Char.IsWhiteSpace(tmp[ctr])
 						&& tmp[ctr] != '(' && tmp[ctr] != ')'
 						&& tmp[ctr] != '+' && tmp[ctr] != '-'
 						&& tmp[ctr] != '/' && tmp[ctr] != '*'
-						&& tmp[ctr] != ',' && tmp[ctr] != '=')
+						&& tmp[ctr] != ',' && tmp[ctr] != '='
+						&& tmp[ctr] != ';')
 					{
 						total += tmp[ctr++];
 						
@@ -181,5 +189,6 @@ namespace SubexpressionEliminator
 		public const int Literal = 5;
 		public const int Comma = 6;
 		public const int Assigment = 7;
+		public const int SemiColon = 8;
 	}
 }
