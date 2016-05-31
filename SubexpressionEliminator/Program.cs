@@ -40,7 +40,7 @@ namespace SubexpressionEliminator
 			string file = File.ReadAllText(args[0]);
 
 			//This makes the debugger break when the exception is thrown
-			//It serves no use in release builds so we enable it.
+			//Enable it in release builds so that we can exit gracefully
 #if !DEBUG
 			try
 			{

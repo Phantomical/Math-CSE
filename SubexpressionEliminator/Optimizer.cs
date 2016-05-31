@@ -125,7 +125,8 @@ namespace SubexpressionEliminator
 
 				foreach (var n in flat)
 				{
-					for (int i = 0; i < n.Children.Count; ++i)
+					int count = n.Children.Count;
+					for (int i = 0; i < count; ++i)
 					{
 						if (n.Children[i].Equals(node))
 						{
